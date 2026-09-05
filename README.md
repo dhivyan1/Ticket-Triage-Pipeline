@@ -1,3 +1,11 @@
+<img width="842" height="692" alt="langfude" src="https://github.com/user-attachments/assets/5fc742e0-1d29-4f80-aadc-438ff54f7b37" />
+<img width="1226" height="575" alt="Screenshot 2026-09-05 150022" src="https://github.com/user-attachments/assets/63963f4c-c6e8-4ef9-909c-13f4234f57c1" />
+<img width="1213" height="650" alt="Screenshot 2026-09-05 150205" src="https://github.com/user-attachments/assets/fade5ad8-f71a-4d94-9dc4-c83f908a4c0a" />
+<img width="1228" height="512" alt="Screenshot 2026-09-05 150350" src="https://github.com/user-attachments/assets/2716ee31-9cb3-485c-8013-0b7be79fb4e6" />
+<img width="1229" height="427" alt="Screenshot 2026-09-05 150555" src="https://github.com/user-attachments/assets/fe7144c9-420f-4a89-9938-77a4be1f29a6" />
+<img width="857" height="647" alt="langfuse2" src="https://github.com/user-attachments/assets/40b16c94-446d-4b05-913e-14948c6c4975" />
+
+
 # Agent Ticket Triage Pipeline
 
 An AI-powered pipeline that automatically triages incoming support tickets, enriches them with customer context, retrieves relevant knowledge base articles, generates grounded responses, and either auto-responds or queues a draft for human review.
