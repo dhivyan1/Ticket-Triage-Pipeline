@@ -1,0 +1,29 @@
+# secrets
+.env
+.env.local
+
+# vector store — rebuild with scripts/build_vectorstore.py
+chroma_db/
+
+# generated logs
+logs/
+
+# eval output
+eval/results.json
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# editors / os
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

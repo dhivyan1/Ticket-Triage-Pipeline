@@ -1,0 +1,54 @@
+name: eval
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: ruff check app scripts eval tests
+      - run: pytest -q
+
+  eval:
+    # The routing rules and prompts are the things that silently regress.
+    # This job catches a rule edit that starts auto-answering billing
+    # disputes before it reaches main.
+    runs-on: ubuntu-latest
+    needs: unit
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+
+      - name: Build the vector store
+        run: |
+          python scripts/seed_knowledge_base.py
+          python scripts/build_vectorstore.py --rebuild
+        env:
+          LLM_PROVIDER: anthropic
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Run eval
+        run: python eval/run_eval.py --fail-under 0.85
+        env:
+          LLM_PROVIDER: anthropic
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ITRE_DRY_RUN: "true"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: eval-results
+          path: eval/results.json

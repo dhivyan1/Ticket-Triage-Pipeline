@@ -1,0 +1,12 @@
+ollama serve
+
+cd "C:\Learning\AI Agents\Agentic Ticket Triage Pipeline"
+uvicorn app.main:app --reload --port 8000
+
+npx localtunnel --port 8000 --subdomain tickettriage
+
+python -m app.worker
+
+streamlit run app\dashboard.py
+
+docker start redis

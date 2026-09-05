@@ -1,0 +1,88 @@
+# Classification rules, evaluated top to bottom. First match wins.
+#
+# Operators:  __eq (default) __in __gte __lt __contains_any
+# Facts available: intent, product_area, urgency, missing_info, plan, mrr,
+#                  known_customer, doc_count, top_score, labels
+#
+# Order matters and encodes the risk model: escalate rules first, then the
+# guards that force a human onto an otherwise-answerable ticket, then the
+# narrow auto rules, then review as the catch-all. A guard placed below an
+# auto rule can never fire - that is the bug this ordering prevents.
+
+rules:
+  # --- escalate: never answered by a machine -------------------------------
+
+  - name: security_or_data_loss
+    when:
+      labels__contains_any: [security, breach, data-loss, gdpr]
+    route: escalate
+    reason: "Security or data-loss report — goes straight to the on-call engineer."
+
+  - name: critical_urgency
+    when:
+      urgency: critical
+    route: escalate
+    reason: "Customer reports a critical outage."
+
+  - name: billing_dispute
+    when:
+      product_area__in: [billing, invoicing, payments]
+      intent__in: [refund, chargeback, dispute, cancel]
+    route: escalate
+    reason: "Money is involved; a human owns this conversation."
+
+  - name: enterprise_account
+    when:
+      mrr__gte: 5000
+    route: escalate
+    reason: "High-value account — handled by the named CSM, not the bot."
+
+  # --- guards: answerable, but a human confirms ----------------------------
+
+  - name: unknown_reporter
+    when:
+      known_customer: false
+    route: review
+    reason: "Reporter is not in the CRM - verify before replying."
+
+  - name: destructive_account_action
+    when:
+      intent__in: [remove-member, delete-account, revoke-access, offboard]
+    route: review
+    reason: "Request changes someone else's access; confirm the requester is an admin."
+
+  # --- auto: safe to answer without a human --------------------------------
+
+  - name: well_documented_howto
+    when:
+      intent__in: [how-to, question, documentation]
+      doc_count__gte: 2
+      top_score__gte: 0.6
+      urgency__in: [low, medium]
+      missing_info__lt: 1
+    route: auto
+    confidence: 0.9
+    reason: "Straightforward how-to with strong knowledge-base support."
+
+  - name: known_password_reset
+    when:
+      product_area: authentication
+      intent__in: [password-reset, login-help]
+      doc_count__gte: 1
+    route: auto
+    confidence: 0.95
+    reason: "Standard account recovery flow, fully covered by the runbook."
+
+  # --- review: draft it, human approves ------------------------------------
+
+  - name: thin_retrieval
+    when:
+      doc_count__lt: 1
+    route: review
+    reason: "Nothing relevant in the knowledge base; the draft needs checking."
+
+  - name: high_urgency
+    when:
+      urgency: high
+    route: review
+    reason: "High urgency; a human confirms the response before it goes out."
